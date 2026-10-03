@@ -1,14 +1,20 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
-import { UserController } from './user/user.controller.js';
-import { UserService } from './user/user.service.js';
-import { UserModule } from './user/user.module.js';
 
+import { ArcjetModule } from '@arcjet/nest';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [UserModule],
-  controllers: [AppController, UserController],
-  providers: [AppService, UserService],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    ArcjetModule.forRoot({
+      key: process.env.ARCJET_KEY!,
+      rules: [], // Add specific rules (e.g. shield, bot detection) per route or globally later
+    }),
+
+  ],
+  controllers: [AppController],
+  providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }
