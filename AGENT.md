@@ -8,7 +8,7 @@ As an AI agent working on this project, please adhere to the following stack, co
 - **Framework:** NestJS
 - **Language:** TypeScript
 - **Package Manager:** Bun
-- **Database ORM:** Prisma
+- **Database ORM:** Drizzle ORM
 - **Authentication:** Better Auth
 - **Security / Rate Limiting:** Arcjet
 - **Testing:** Vitest
@@ -18,9 +18,9 @@ As an AI agent working on this project, please adhere to the following stack, co
 ## MCP Servers and Skills Configured
 The following tools and context have been explicitly added to this workspace to enhance agent capabilities. **You should actively leverage them whenever relevant:**
 
-- **Prisma:**
-  - **MCP Server:** Available for database schema insight and interactions.
-  - **Usage:** Use Prisma for database schema definitions, migrations, and type-safe queries.
+- **Drizzle ORM:**
+  - **Skills:** `drizzle-orm`
+  - **Usage:** Use Drizzle ORM for database schema definitions, migrations, and type-safe queries instead of Prisma.
 
 - **Better Auth:**
   - **MCP Server:** Available for authentication reference and management.
@@ -33,7 +33,7 @@ The following tools and context have been explicitly added to this workspace to 
   - **Usage:** Implement Arcjet to secure critical routes (e.g., rate limiting, bot protection, email validation).
 
 ## Development Rules
-1. **Tooling & Skills:** **ALWAYS read your available skills and query relevant MCP servers before taking any action or writing code.** The ecosystem changes rapidly (e.g., Prisma 8), and these resources contain the source of truth.
+1. **Tooling & Skills:** **ALWAYS read your available skills and query relevant MCP servers before taking any action or writing code.** The ecosystem changes rapidly (e.g., Drizzle ORM updates), and these resources contain the source of truth.
 2. **Privacy:** **Never read the `.env` file under any circumstances.**
 3. **Package Management:** Always use `bun` instead of `npm` or `yarn` for managing dependencies and running scripts. Note: On Windows PowerShell, if scripts fail due to execution policies, fallback to using `bun.cmd` or `bunx.cmd`.
 4. **Architecture:** Follow standard NestJS architecture (Modules, Controllers, Services). Keep business logic in services.
