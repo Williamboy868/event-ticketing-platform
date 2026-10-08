@@ -4,6 +4,8 @@ import { AppService } from './app.service.js';
 
 import { ArcjetModule } from '@arcjet/nest';
 import { ConfigModule } from '@nestjs/config';
+import { EventsModule } from './events/events.module.js';
+import { AuthModule } from './auth/auth.module.js';
 
 @Module({
   imports: [
@@ -12,7 +14,8 @@ import { ConfigModule } from '@nestjs/config';
       key: process.env.ARCJET_KEY!,
       rules: [], // Add specific rules (e.g. shield, bot detection) per route or globally later
     }),
-
+    EventsModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,7 +1,7 @@
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
-import * as schema from './schema';
-import * as authSchema from './auth-schema';
+import * as schema from './schema.js';
+import * as authSchema from './auth-schema.js';
 import * as dotenv from 'dotenv';
 dotenv.config();
 

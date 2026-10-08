@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { openAPI } from "better-auth/plugins";
 import { db } from "./db/index.js"; // Note: .js for node/NestJS if required, or .ts
 
 export const auth = betterAuth({
@@ -13,4 +14,7 @@ export const auth = betterAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
     },
   },
+  plugins: [
+    openAPI(),
+  ],
 });

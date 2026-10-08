@@ -1,6 +1,6 @@
 import { pgTable, uuid, text, timestamp, doublePrecision, integer, pgEnum } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
-import { user } from './auth-schema';
+import { user } from './auth-schema.js';
 
 export const userRoleEnum = pgEnum('user_role', ['PARTICIPANT', 'ORGANIZER', 'ADMIN']);
 export const eventStatusEnum = pgEnum('event_status', ['UPCOMING', 'ONGOING', 'COMPLETED', 'CANCELLED']);
