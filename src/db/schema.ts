@@ -1,5 +1,6 @@
 import { pgTable, uuid, text, timestamp, doublePrecision, integer, pgEnum } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
+import { user } from './auth-schema';
 
 export const userRoleEnum = pgEnum('user_role', ['PARTICIPANT', 'ORGANIZER', 'ADMIN']);
 export const eventStatusEnum = pgEnum('event_status', ['UPCOMING', 'ONGOING', 'COMPLETED', 'CANCELLED']);
@@ -7,18 +8,11 @@ export const orderStatusEnum = pgEnum('order_status', ['PENDING', 'PAID', 'CANCE
 export const paymentStatusEnum = pgEnum('payment_status', ['PENDING', 'SUCCESSFUL', 'FAILED']);
 export const ticketStatusEnum = pgEnum('ticket_status', ['ACTIVE', 'SCANNED']);
 
-export const users = pgTable('users', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  firstName: text('first_name').notNull(),
-  lastName: text('last_name').notNull(),
-  email: text('email').notNull().unique(),
-  password: text('password').notNull(),
-  role: userRoleEnum('role').default('PARTICIPANT').notNull(),
-});
+// users table has been replaced by the user table from better-auth
 
 export const events = pgTable('events', {
   id: uuid('id').defaultRandom().primaryKey(),
-  organizerId: uuid('organizer_id').references(() => users.id).notNull(),
+  organizerId: text('organizer_id').references(() => user.id).notNull(),
   name: text('name').notNull(),
   description: text('description').notNull(),
   startTime: timestamp('start_time').notNull(),
@@ -37,7 +31,7 @@ export const ticketCategories = pgTable('ticket_categories', {
 
 export const orders = pgTable('orders', {
   id: uuid('id').defaultRandom().primaryKey(),
-  participantId: uuid('participant_id').references(() => users.id).notNull(),
+  participantId: text('participant_id').references(() => user.id).notNull(),
   eventId: uuid('event_id').references(() => events.id).notNull(),
   totalAmount: doublePrecision('total_amount').notNull(),
   status: orderStatusEnum('status').default('PENDING').notNull(),
@@ -60,15 +54,11 @@ export const tickets = pgTable('tickets', {
 });
 
 // Relations
-export const usersRelations = relations(users, ({ many }) => ({
-  organizedEvents: many(events),
-  orders: many(orders),
-}));
 
 export const eventsRelations = relations(events, ({ one, many }) => ({
-  organizer: one(users, {
+  organizer: one(user, {
     fields: [events.organizerId],
-    references: [users.id],
+    references: [user.id],
   }),
   ticketCategories: many(ticketCategories),
   orders: many(orders),
@@ -83,9 +73,9 @@ export const ticketCategoriesRelations = relations(ticketCategories, ({ one, man
 }));
 
 export const ordersRelations = relations(orders, ({ one, many }) => ({
-  participant: one(users, {
+  participant: one(user, {
     fields: [orders.participantId],
-    references: [users.id],
+    references: [user.id],
   }),
   event: one(events, {
     fields: [orders.eventId],
