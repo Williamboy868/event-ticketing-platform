@@ -19,6 +19,7 @@ describe('AppController (e2e)', () => {
   it('/ (GET)', () => {
     return request(app.getHttpServer())
       .get('/')
+      .set('User-Agent', 'Mozilla/5.0 (compatible; Vitest/1.0)')
       .expect(200)
       .expect('Hello World!');
   });
