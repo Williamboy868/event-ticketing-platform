@@ -19,7 +19,7 @@ export class EventsService {
     return { message: `This action returns a #${id} event` };
   }
 
-  update(id: string, updateEventDto: UpdateEventDto) {
+  update(id: string, _updateEventDto: UpdateEventDto) {
     return { message: `This action updates a #${id} event` };
   }
 

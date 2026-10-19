@@ -7,6 +7,8 @@ export const auth = betterAuth({
   database: drizzleAdapter(db, { provider: "pg" }),
   emailAndPassword: {
     enabled: true,
+    minPasswordLength: 8,
+    maxPasswordLength: 128,
   },
   socialProviders: {
     google: {
@@ -18,3 +20,7 @@ export const auth = betterAuth({
     openAPI(),
   ],
 });
+
+// Inferred types for use in guards, decorators, and controllers
+export type Session = typeof auth.$Infer.Session;
+export type User = typeof auth.$Infer.Session.user;

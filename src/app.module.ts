@@ -10,15 +10,9 @@ import {
 } from '@arcjet/nest';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
-
-<<<<<<< HEAD
-=======
-import { ArcjetModule } from '@arcjet/nest';
-import { ConfigModule } from '@nestjs/config';
 import { EventsModule } from './events/events.module.js';
 import { AuthModule } from './auth/auth.module.js';
 
->>>>>>> c2a9fbcc91c2f26e16a4dd6d86a129722c8b6fe8
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -57,11 +51,8 @@ import { AuthModule } from './auth/auth.module.js';
       }),
       inject: [ConfigService],
     }),
-<<<<<<< HEAD
-=======
     EventsModule,
     AuthModule,
->>>>>>> c2a9fbcc91c2f26e16a4dd6d86a129722c8b6fe8
   ],
   controllers: [AppController],
   providers: [
