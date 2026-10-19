@@ -2,15 +2,34 @@
 
 > **Notice for AI Agents:** This document is the authoritative developer and agent guideline for the **Event Ticketing Platform**. Before taking any coding action, designing modules, or running database workflows, you **MUST** read and adhere to the guidelines, MCP server integrations, and local skill runbooks detailed below.
 
+<<<<<<< HEAD
 > [!IMPORTANT]
 > **MANDATORY DIRECTIVE — READ SKILLS & USE MCP SERVERS FIRST:**
 > Before taking **ANY** action, creating or modifying files, or designing architecture, agents **MUST** thoroughly read their relevant domain skills in `.agents/skills/` and, when necessary, query their configured MCP servers (`better-auth`, `Prisma`, `arcjet`) to retrieve live, authoritative documentation, contracts, and best practices. Never proceed based on guesses, assumptions, or legacy syntax.
+=======
+## Technology Stack
+- **Framework:** NestJS
+- **Language:** TypeScript
+- **Package Manager:** Bun
+- **Database ORM:** Drizzle ORM
+- **Authentication:** Better Auth
+- **Security / Rate Limiting:** Arcjet
+- **Testing:** Vitest
+- **Linting:** oxlint
+- **Formatting:** Prettier
+>>>>>>> c2a9fbcc91c2f26e16a4dd6d86a129722c8b6fe8
 
 > [!CAUTION]
 > **STRICT PRIVACY POLICY — DO NOT READ `.env` FILES:**
 > Agents must **NEVER** read, view, open, inspect, or output the user's `.env` file (including `.env`, `.env.local`, `test/.env`, or any `.env*` file). Refer strictly to `.env.example` for environment variable templates and configuration structure.
 
+<<<<<<< HEAD
 ---
+=======
+- **Drizzle ORM:**
+  - **Skills:** `drizzle-orm`
+  - **Usage:** Use Drizzle ORM for database schema definitions, migrations, and type-safe queries instead of Prisma.
+>>>>>>> c2a9fbcc91c2f26e16a4dd6d86a129722c8b6fe8
 
 ## 1. Project Overview & Architectural Mission
 
@@ -21,7 +40,17 @@ The **Event Ticketing Platform** is an enterprise-grade backend built with **Nes
 - Arcjet-powered anti-scalping, rate limiting, and bot protection.
 - Contract-first relational data modeling via **Prisma 8**.
 
+<<<<<<< HEAD
 ---
+=======
+## Development Rules
+1. **Tooling & Skills:** **ALWAYS read your available skills and query relevant MCP servers before taking any action or writing code.** The ecosystem changes rapidly (e.g., Drizzle ORM updates), and these resources contain the source of truth.
+2. **Privacy:** **Never read the `.env` file under any circumstances.**
+3. **Package Management:** Always use `bun` instead of `npm` or `yarn` for managing dependencies and running scripts. Note: On Windows PowerShell, if scripts fail due to execution policies, fallback to using `bun.cmd` or `bunx.cmd`.
+4. **Architecture:** Follow standard NestJS architecture (Modules, Controllers, Services). Keep business logic in services.
+5. **Testing:** Use Vitest for writing unit and e2e tests.
+6. **Code Quality:** Ensure code passes `oxlint` checks and is formatted with Prettier before completing tasks.
+>>>>>>> c2a9fbcc91c2f26e16a4dd6d86a129722c8b6fe8
 
 ## 2. Technology Stack & Runtime
 
