@@ -18,3 +18,19 @@ export class SignInDto {
   @ApiProperty({ example: 'password123', description: 'User password' })
   password!: string;
 }
+
+export class SocialSignInDto {
+  @ApiProperty({
+    example: 'google',
+    description: 'Social provider ID',
+    enum: ['google'],
+  })
+  provider!: string;
+
+  @ApiProperty({
+    example: '/dashboard',
+    description: 'URL to redirect to after successful authentication',
+    required: false,
+  })
+  callbackURL?: string;
+}

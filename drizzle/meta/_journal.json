@@ -8,6 +8,20 @@
       "when": 1791469470438,
       "tag": "0000_right_ultron",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792402788566,
+      "tag": "0001_needy_aqueduct",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792403474398,
+      "tag": "0002_curved_stingray",
+      "breakpoints": true
     }
   ]
 }
