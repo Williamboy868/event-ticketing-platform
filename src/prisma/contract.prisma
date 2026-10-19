@@ -1,0 +1,363 @@
+// use prisma-8
+
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ----------------------------------------------------
+// ENUMS
+// ----------------------------------------------------
+
+enum Role {
+  @@type("pg/text@1")
+  PARTICIPANT = "PARTICIPANT"
+  ORGANIZER   = "ORGANIZER"
+}
+
+enum EventFormat {
+  @@type("pg/text@1")
+  IN_PERSON = "IN_PERSON"
+  ONLINE    = "ONLINE"
+  HYBRID    = "HYBRID"
+}
+
+enum EventStatus {
+  @@type("pg/text@1")
+  DRAFT     = "DRAFT"
+  PUBLISHED = "PUBLISHED"
+  ONGOING   = "ONGOING"
+  COMPLETED = "COMPLETED"
+  CANCELLED = "CANCELLED"
+}
+
+enum TicketCategoryStatus {
+  @@type("pg/text@1")
+  ACTIVE   = "ACTIVE"
+  SOLD_OUT = "SOLD_OUT"
+  PAUSED   = "PAUSED"
+  HIDDEN   = "HIDDEN"
+}
+
+enum OrderStatus {
+  @@type("pg/text@1")
+  PENDING   = "PENDING"
+  PAID      = "PAID"
+  CANCELLED = "CANCELLED"
+  EXPIRED   = "EXPIRED"
+  REFUNDED  = "REFUNDED"
+}
+
+enum PaymentStatus {
+  @@type("pg/text@1")
+  PENDING    = "PENDING"
+  SUCCESSFUL = "SUCCESSFUL"
+  FAILED     = "FAILED"
+  REFUNDED   = "REFUNDED"
+}
+
+enum TicketStatus {
+  @@type("pg/text@1")
+  ACTIVE     = "ACTIVE"
+  CHECKED_IN = "CHECKED_IN"
+  CANCELLED  = "CANCELLED"
+  REFUNDED   = "REFUNDED"
+}
+
+enum DiscountType {
+  @@type("pg/text@1")
+  PERCENTAGE   = "PERCENTAGE"
+  FIXED_AMOUNT = "FIXED_AMOUNT"
+}
+
+enum RefundStatus {
+  @@type("pg/text@1")
+  PENDING   = "PENDING"
+  PROCESSED = "PROCESSED"
+  FAILED    = "FAILED"
+}
+
+// ----------------------------------------------------
+// AUTHENTICATION & USER MANAGEMENT (Better Auth Compatible)
+// ----------------------------------------------------
+
+model User {
+  id             String    @id @default(uuid()) @db.Uuid
+  first_name     String
+  last_name      String
+  email          String    @unique
+  email_verified Boolean   @default(false)
+  image          String?
+  phone_number   String?
+  role           Role      @default(PARTICIPANT)
+  created_at     DateTime  @default(now())
+  updated_at     DateTime  @updatedAt
+
+  // Auth Relations
+  sessions Session[]
+  accounts Account[]
+
+  // Domain Relations
+  organized_events Event[]   @relation("OrganizedEvents")
+  orders           Order[]   @relation("PlacedOrders")
+  scanned_tickets  Ticket[]  @relation("ScannedTickets")
+}
+
+model Session {
+  id         String   @id @default(uuid()) @db.Uuid
+  user_id    String   @db.Uuid
+  token      String   @unique
+  expires_at DateTime
+  ip_address String?
+  user_agent String?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+}
+
+model Account {
+  id                      String    @id @default(uuid()) @db.Uuid
+  user_id                 String    @db.Uuid
+  account_id              String
+  provider_id             String
+  password                String?
+  access_token            String?
+  refresh_token           String?
+  id_token                String?
+  access_token_expires_at DateTime?
+  scope                   String?
+  created_at              DateTime  @default(now())
+  updated_at              DateTime  @updatedAt
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([provider_id, account_id])
+  @@index([user_id])
+}
+
+model Verification {
+  id         String   @id @default(uuid()) @db.Uuid
+  identifier String
+  value      String
+  expires_at DateTime
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([identifier])
+}
+
+// ----------------------------------------------------
+// EVENT & PROMOTIONS
+// ----------------------------------------------------
+
+model Event {
+  id                  String      @id @default(uuid()) @db.Uuid
+  organizer_id        String      @db.Uuid
+  title               String
+  slug                String      @unique
+  description         String
+  category            String
+  format              EventFormat @default(IN_PERSON)
+  venue_name          String?
+  venue_address       String?
+  city                String?
+  country             String?
+  virtual_meeting_url String?
+  banner_image_url    String?
+  thumbnail_url       String?
+  start_time          DateTime
+  end_time            DateTime
+  status              EventStatus @default(DRAFT)
+  created_at          DateTime    @default(now())
+  updated_at          DateTime    @updatedAt
+
+  organizer         User             @relation("OrganizedEvents", fields: [organizer_id], references: [id], onDelete: Restrict)
+  ticket_categories TicketCategory[]
+  promo_codes       PromoCode[]
+  orders            Order[]
+
+  @@index([organizer_id])
+  @@index([status])
+  @@index([start_time])
+}
+
+model PromoCode {
+  id             String       @id @default(uuid()) @db.Uuid
+  event_id       String       @db.Uuid
+  code           String
+  discount_type  DiscountType @default(PERCENTAGE)
+  discount_value Float
+  max_uses       Int?
+  current_uses   Int          @default(0)
+  valid_from     DateTime?
+  valid_until    DateTime?
+  is_active      Boolean      @default(true)
+  created_at     DateTime     @default(now())
+  updated_at     DateTime     @updatedAt
+
+  event  Event   @relation(fields: [event_id], references: [id], onDelete: Cascade)
+  orders Order[]
+
+  @@unique([event_id, code])
+  @@index([event_id])
+}
+
+// ----------------------------------------------------
+// TICKETING & INVENTORY
+// ----------------------------------------------------
+
+model TicketCategory {
+  id                 String               @id @default(uuid()) @db.Uuid
+  event_id           String               @db.Uuid
+  name               String
+  description        String?
+  price              Float
+  currency           String               @default("USD")
+  total_capacity     Int
+  available_capacity Int
+  min_per_order      Int                  @default(1)
+  max_per_order      Int                  @default(10)
+  sales_start_at     DateTime?
+  sales_end_at       DateTime?
+  status             TicketCategoryStatus @default(ACTIVE)
+  created_at         DateTime             @default(now())
+  updated_at         DateTime             @updatedAt
+
+  event       Event       @relation(fields: [event_id], references: [id], onDelete: Cascade)
+  order_items OrderItem[]
+  tickets     Ticket[]
+
+  @@index([event_id])
+}
+
+// ----------------------------------------------------
+// ORDERS & CHECKOUT
+// ----------------------------------------------------
+
+model Order {
+  id              String      @id @default(uuid()) @db.Uuid
+  order_number    String      @unique
+  participant_id  String      @db.Uuid
+  event_id        String      @db.Uuid
+  promo_code_id   String?     @db.Uuid
+  subtotal        Float
+  discount_amount Float       @default(0.0)
+  tax_amount      Float       @default(0.0)
+  total_amount    Float
+  currency        String      @default("USD")
+  status          OrderStatus @default(PENDING)
+  reserved_until  DateTime?
+  created_at      DateTime    @default(now())
+  updated_at      DateTime    @updatedAt
+
+  participant User        @relation("PlacedOrders", fields: [participant_id], references: [id], onDelete: Restrict)
+  event       Event       @relation(fields: [event_id], references: [id], onDelete: Restrict)
+  promo_code  PromoCode?  @relation(fields: [promo_code_id], references: [id], onDelete: SetNull)
+  order_items OrderItem[]
+  tickets     Ticket[]
+  payments    Payment[]
+  refunds     Refund[]
+
+  @@index([participant_id])
+  @@index([event_id])
+  @@index([status])
+}
+
+model OrderItem {
+  id                 String   @id @default(uuid()) @db.Uuid
+  order_id           String   @db.Uuid
+  ticket_category_id String   @db.Uuid
+  quantity           Int
+  unit_price         Float
+  subtotal           Float
+  created_at         DateTime @default(now())
+
+  order           Order          @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  ticket_category TicketCategory @relation(fields: [ticket_category_id], references: [id], onDelete: Restrict)
+  tickets         Ticket[]
+
+  @@index([order_id])
+  @@index([ticket_category_id])
+}
+
+// ----------------------------------------------------
+// TICKETS & ATTENDEES (CHECK-IN)
+// ----------------------------------------------------
+
+model Ticket {
+  id                 String       @id @default(uuid()) @db.Uuid
+  order_id           String       @db.Uuid
+  order_item_id      String       @db.Uuid
+  ticket_category_id String       @db.Uuid
+  ticket_code        String       @unique
+  qr_code_data       String       @unique
+  attendee_name      String
+  attendee_email     String
+  price_paid         Float
+  status             TicketStatus @default(ACTIVE)
+  scanned_at         DateTime?
+  scanned_by_id      String?      @db.Uuid
+  created_at         DateTime     @default(now())
+  updated_at         DateTime     @updatedAt
+
+  order           Order          @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  order_item      OrderItem      @relation(fields: [order_item_id], references: [id], onDelete: Cascade)
+  ticket_category TicketCategory @relation(fields: [ticket_category_id], references: [id], onDelete: Restrict)
+  scanned_by      User?          @relation("ScannedTickets", fields: [scanned_by_id], references: [id], onDelete: SetNull)
+
+  @@index([order_id])
+  @@index([ticket_category_id])
+  @@index([scanned_by_id])
+  @@index([status])
+}
+
+// ----------------------------------------------------
+// PAYMENTS & REFUNDS
+// ----------------------------------------------------
+
+model Payment {
+  id                     String        @id @default(uuid()) @db.Uuid
+  order_id               String        @db.Uuid
+  payment_method         String
+  payment_gateway        String
+  gateway_transaction_id String?       @unique
+  amount                 Float
+  currency               String        @default("USD")
+  status                 PaymentStatus @default(PENDING)
+  failure_reason         String?
+  paid_at                DateTime?
+  created_at             DateTime      @default(now())
+  updated_at             DateTime      @updatedAt
+
+  order   Order    @relation(fields: [order_id], references: [id], onDelete: Restrict)
+  refunds Refund[]
+
+  @@index([order_id])
+  @@index([status])
+}
+
+model Refund {
+  id                String       @id @default(uuid()) @db.Uuid
+  payment_id        String       @db.Uuid
+  order_id          String       @db.Uuid
+  amount            Float
+  currency          String       @default("USD")
+  reason            String?
+  status            RefundStatus @default(PENDING)
+  gateway_refund_id String?      @unique
+  processed_at      DateTime?
+  created_at        DateTime     @default(now())
+  updated_at        DateTime     @updatedAt
+
+  payment Payment @relation(fields: [payment_id], references: [id], onDelete: Restrict)
+  order   Order   @relation(fields: [order_id], references: [id], onDelete: Restrict)
+
+  @@index([payment_id])
+  @@index([order_id])
+}
